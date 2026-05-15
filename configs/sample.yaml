@@ -1,0 +1,13 @@
+experiment_name: sample
+dataset:
+  name: sample
+  queries_path: data/sample/queries.tsv
+  corpus_path: data/sample/corpus.jsonl
+  qrels_path: data/sample/qrels.tsv
+retrieval:
+  top_k: 5
+reranking:
+  top_k: 5
+  anchor_top_k: 3
+outputs:
+  run_dir: results/runs

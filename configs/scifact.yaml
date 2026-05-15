@@ -1,0 +1,13 @@
+experiment_name: scifact
+dataset:
+  name: scifact
+  queries_path: data/beir/scifact/queries.tsv
+  corpus_path: data/beir/scifact/corpus.jsonl
+  qrels_path: data/beir/scifact/qrels.tsv
+retrieval:
+  top_k: 20
+reranking:
+  top_k: 20
+  anchor_top_k: 5
+outputs:
+  run_dir: results/runs

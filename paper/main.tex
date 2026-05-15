@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+
+\usepackage[review]{acl}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+
+\title{Evaluating Global-Context Pointwise LLM Reranking with Small Language Models under Limited Compute}
+
+\author{
+  Author 1 \\
+  \texttt{email1@example.com}
+  \And
+  Author 2 \\
+  \texttt{email2@example.com}
+  \And
+  Author 3 \\
+  \texttt{email3@example.com}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Large language models have shown strong performance as zero-shot rerankers for information retrieval. However, standard pointwise reranking methods score each query-document pair independently and may ignore useful global information from the candidate set. GCCP addresses this limitation by incorporating post-aggregated global context into pointwise reranking. In this work, we investigate whether this global-context strategy remains effective when using smaller instruction-tuned language models under limited computational resources. We compare BM25, standard pointwise LLM reranking, and GCCP/PAGC reranking on a small-scale BEIR dataset. We evaluate both retrieval effectiveness and computational efficiency using nDCG@10, MRR@10, runtime, and the number of LLM calls.
+\end{abstract}
+
+\section{Introduction}
+
+Neural and LLM-based reranking methods have become important components in modern information retrieval pipelines. A common approach is pointwise reranking, where each query-document pair is scored independently. This setting is computationally attractive because it scales linearly over candidate documents and can be implemented with simple prompting strategies.
+
+However, independent pointwise scoring may fail to use comparative information across the candidate set. GCCP proposes to address this limitation by adding global context information and post-aggregated contrastive scoring. While the original paper reports strong results, its effectiveness under smaller language models and limited compute settings remains an open practical question.
+
+This project studies whether GCCP/PAGC remains useful when applied with smaller instruction-tuned LLMs. We focus on a constrained experimental setup that is realistic for student research projects and limited GPU environments.
+
+\section{Related Work}
+
+Prior work on retrieval commonly uses BM25 as a strong lexical first-stage retriever. LLM-based reranking can then be applied to improve the ordering of the top candidate documents. Pointwise reranking scores each document independently, while pairwise and listwise methods compare multiple documents at once. GCCP aims to retain the efficiency of pointwise reranking while injecting global context from the candidate set.
+
+\section{Methodology}
+
+We compare three reranking pipelines. First, BM25 is used as the lexical baseline. Second, a standard pointwise LLM reranker scores each query-document pair independently. Third, GCCP/PAGC uses global context derived from the candidate set and combines it with pointwise relevance scoring.
+
+Our planned extension evaluates whether the global-context mechanism remains beneficial when the reranker uses a smaller 7B/8B instruction-tuned model. We also plan to analyze the sensitivity of the method to the anchor construction strategy.
+
+\section{Experimental Setup}
+
+The initial experiment uses a small BEIR dataset such as SciFact. BM25 retrieves the top candidate documents for each query. The candidate set is then reranked using pointwise scoring and GCCP/PAGC scoring. We evaluate effectiveness using nDCG@10 and MRR@10, and efficiency using runtime, number of LLM calls, and approximate token usage.
+
+\section{Expected Analysis}
+
+We expect the analysis to show whether global context improves reranking quality under limited compute settings. If GCCP/PAGC improves effectiveness with only a moderate efficiency cost, it may be a practical reranking strategy for small LLMs. If the gains are limited, the results may suggest that global-context reranking depends heavily on model capacity or anchor quality.
+
+\section{Conclusion}
+
+This project investigates the practicality of global-context pointwise LLM reranking for small language models. The final study will report effectiveness and efficiency trade-offs across BM25, pointwise LLM reranking, and GCCP/PAGC reranking.
+
+\bibliography{custom}
+
+\end{document}

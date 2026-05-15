@@ -14,7 +14,8 @@ At this stage, the code provides a lightweight experimental scaffold:
 
 - BM25 retrieval
 - placeholder pointwise reranking
-- placeholder GCCP-style global-context reranking
+- GCCP-style global-context reranking with a deterministic sentence anchor
+- PAGC-style post-aggregation of pointwise and global-context scores
 - nDCG@k and MRR@k evaluation
 - a tiny sample dataset for smoke testing
 
@@ -36,7 +37,8 @@ We compare the following methods:
 
 1. BM25 baseline
 2. Standard pointwise LLM reranking
-3. GCCP/PAGC reranking with global context
+3. GCCP reranking with global context
+4. PAGC post-aggregation of pointwise and GCCP scores
 
 ## Initial Dataset Plan
 
@@ -85,8 +87,9 @@ We plan to evaluate both effectiveness and efficiency:
 - Defined the research question and experimental scope.
 - Prepared the initial repository structure.
 - Implemented a minimal BM25 retrieval pipeline.
-- Added skeleton pointwise and GCCP reranking modules.
+- Added skeleton pointwise, GCCP, and PAGC reranking modules.
 - Added evaluation utilities for nDCG@k and MRR@k.
+- Added TREC-style run file output for retrieval experiments.
 - Prepared an initial ACL-style paper draft.
 
 ## Setup
@@ -119,15 +122,17 @@ Run the placeholder GCCP reranker:
 python scripts/run_gccp.py --config configs/sample.yaml
 ```
 
+This command also writes a PAGC-style aggregated run.
+
 Evaluate a run file:
 
 ```bash
-python scripts/evaluate.py --config configs/sample.yaml --run results/runs/sample_bm25.json
+python scripts/evaluate.py --config configs/sample.yaml --run results/runs/sample_bm25.txt
 ```
 
 ## Notes
 
-The current reranking modules use deterministic lexical scoring as placeholders. They are designed to be replaced with real LLM scoring functions after the baseline pipeline is stable.
+The current reranking modules use deterministic lexical scoring as placeholders. The pointwise and GCCP modules already expose prompt templates that are intended to be connected to real LLM likelihood scoring after the baseline pipeline is stable.
 
 ## References
 

@@ -11,7 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.config import load_config
 from src.data import load_qrels
 from src.evaluation import evaluate_run
-from src.retrieval import load_run
+from src.run_io import load_run
 
 
 def parse_args() -> argparse.Namespace:

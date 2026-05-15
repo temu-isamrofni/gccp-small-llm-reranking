@@ -10,7 +10,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import load_config
 from src.data import load_corpus, load_queries
-from src.retrieval import run_bm25, save_run
+from src.retrieval import run_bm25
+from src.run_io import save_run
 
 
 def parse_args() -> argparse.Namespace:
@@ -27,8 +28,8 @@ def main() -> None:
     corpus = load_corpus(config.dataset.corpus_path)
     run = run_bm25(queries, corpus, config.retrieval.top_k)
 
-    output_path = config.outputs.run_dir / f"{config.experiment_name}_bm25.json"
-    save_run(output_path, run)
+    output_path = config.outputs.run_dir / f"{config.experiment_name}_bm25.txt"
+    save_run(output_path, run, tag="BM25")
     print(f"Saved BM25 run to {output_path}")
 
 

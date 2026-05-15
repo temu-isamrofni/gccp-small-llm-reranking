@@ -3,6 +3,17 @@ from __future__ import annotations
 from src.data import Document
 from src.retrieval import tokenize
 
+YES_NO_PROMPT_TEMPLATE = (
+    "Passage: {document}\n"
+    "Query: {query}\n"
+    "Is the passage relevant to the query? Answer 'yes' or 'no'."
+)
+
+
+def build_pointwise_prompt(query: str, document: Document) -> str:
+    """Build the pointwise yes/no relevance prompt used by the planned LLM scorer."""
+    return YES_NO_PROMPT_TEMPLATE.format(query=query, document=document.content)
+
 
 def lexical_pointwise_score(query: str, document: Document) -> float:
     """

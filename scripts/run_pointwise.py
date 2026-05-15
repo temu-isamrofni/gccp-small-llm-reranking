@@ -11,7 +11,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.config import load_config
 from src.data import load_corpus, load_queries
 from src.pointwise_reranker import rerank_pointwise
-from src.retrieval import load_run, run_bm25, save_run
+from src.retrieval import run_bm25
+from src.run_io import load_run, save_run
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,8 +45,8 @@ def main() -> None:
         top_k=config.reranking.top_k,
     )
 
-    output_path = config.outputs.run_dir / f"{config.experiment_name}_pointwise.json"
-    save_run(output_path, run)
+    output_path = config.outputs.run_dir / f"{config.experiment_name}_pointwise.txt"
+    save_run(output_path, run, tag="POINTWISE")
     print(f"Saved pointwise reranking run to {output_path}")
 
 

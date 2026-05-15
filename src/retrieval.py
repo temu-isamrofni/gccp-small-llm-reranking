@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import re
-from pathlib import Path
 
 from rank_bm25 import BM25Okapi
 
@@ -43,17 +41,3 @@ def run_bm25(
         ]
 
     return results
-
-
-def save_run(path: str | Path, run: dict[str, list[dict[str, float | str]]]) -> None:
-    """Save retrieval or reranking results as JSON."""
-    output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as file:
-        json.dump(run, file, indent=2)
-
-
-def load_run(path: str | Path) -> dict[str, list[dict[str, float | str]]]:
-    """Load retrieval or reranking results from JSON."""
-    with Path(path).open("r", encoding="utf-8") as file:
-        return json.load(file)

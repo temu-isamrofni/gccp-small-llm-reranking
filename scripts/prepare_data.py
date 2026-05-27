@@ -1,15 +1,15 @@
+import json
 from datasets import load_dataset
 from pathlib import Path
-import json
 
 def prepare_scifact():
     out_dir = Path("data/beir/scifact")
     out_dir.mkdir(parents=True, exist_ok=True)
     
-    # Memuat dataset berformat Parquet yang aman dari error script loading
+    # Memuat dataset berformat Parquet mteb
     corpus_ds = load_dataset("mteb/scifact", "corpus", split="corpus")
     queries_ds = load_dataset("mteb/scifact", "queries", split="queries")
-    default_ds = load_dataset("mteb/scifact", default, split="test") # qrels
+    default_ds = load_dataset("mteb/scifact", "default", split="test") 
 
     # Simpan Corpus ke jsonl
     with open(out_dir / "corpus.jsonl", "w", encoding="utf-8") as f:

@@ -6,6 +6,10 @@ from dataclasses import dataclass
 from src.data import Document
 from src.retrieval import tokenize
 
+import numpy as np
+from scipy.linalg import eigh
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 SENTENCE_PATTERN = re.compile(r"(?<=[.!?])\s+")
 
 
@@ -86,4 +90,54 @@ def build_sentence_anchor(
         text=anchor_text,
         source_doc_ids=source_doc_ids,
         selected_sentences=selected_sentences,
+    )
+
+def build_sentence_anchor_spectral(query, corpus, candidates, anchor_top_k, z=10, theta=0.1):
+    # 1. Kumpulkan semua kalimat dari top-m candidates
+    selected_docs = candidates[:anchor_top_k]
+    sentences = []
+    sentence_metadata = [] # untuk melacak doc_id asli dan urutan
+    
+    for rank, cand in enumerate(selected_docs):
+        doc = corpus[str(cand["doc_id"])]
+        cand_sentences = split_sentences(doc.content)
+        for idx, sent in enumerate(cand_sentences):
+            sentences.append(sent)
+            sentence_metadata.append({"doc_id": cand["doc_id"], "orig_idx": idx, "text": sent})
+            
+    if not sentences:
+        return AnchorInfo("", [], [])
+
+    # 2. Konstruksi Afinitas Matrix (A) menggunakan TF-IDF Cosine Similarity
+    vec = TfidfVectorizer()
+    tfidf_matrix = vec.fit_transform(sentences).toarray()
+    A = np.dot(tfidf_matrix, tfidf_matrix.T)
+    A[A < theta] = 0.0  # Thresholding filter noise
+    np.fill_diagonal(A, 0)
+    
+    # 3. Hitung Matriks Derajat (D) dan Laplacian Terormalisasi (L)
+    d = np.sum(A, axis=1)
+    d[d == 0] = 1e-6 # proteksi pembagian nol
+    D_inv_sqrt = np.diag(1.0 / np.sqrt(d))
+    I = np.eye(len(sentences))
+    L = I - np.dot(np.dot(D_inv_sqrt, A), D_inv_sqrt)
+    
+    # 4. Selesaikan Persamaan Nilai Eigen untuk mendapatkan Vektor Fiedler (v_2)
+    eigenvalues, eigenvectors = eigh(L)
+    # Ambil indeks terurut, nilai eigen terkecil kedua biasanya berada pada indeks 1
+    fiedler_vector = eigenvectors[:, 1]
+    
+    # 5. Klasterisasi berdasarkan tanda komponen Fiedler Vector
+    cluster_pos = [sentence_metadata[i] for i in range(len(sentences)) if fiedler_vector[i] >= 0]
+    cluster_neg = [sentence_metadata[i] for i in range(len(sentences)) if fiedler_vector[i] < 0]
+    chosen_cluster = cluster_pos if len(cluster_pos) >= len(cluster_neg) else cluster_neg
+    
+    # 6. Urutkan kembali demi koherensi diskursus teks
+    chosen_cluster.sort(key=lambda x: (x["doc_id"], x["orig_idx"]))
+    selected_sentences = [item["text"] for item in chosen_cluster[:z]]
+    
+    return AnchorInfo(
+        text=" ".join(selected_sentences),
+        source_doc_ids=list(set([item["doc_id"] for item in chosen_cluster])),
+        selected_sentences=selected_sentences
     )

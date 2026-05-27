@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from src.data import Document
 from src.retrieval import tokenize
+import torch
 
 YES_NO_PROMPT_TEMPLATE = (
     "Passage: {document}\n"
@@ -53,3 +54,21 @@ def rerank_pointwise(
         )[:top_k]
 
     return reranked
+
+def compute_llm_pointwise_score(query, document, model, tokenizer, device):
+    prompt = build_pointwise_prompt(query, document) # Menggunakan templat bawaan proyekmu
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits[:, -1, :] # Ambil logit dari posisi token terakhir
+        
+    # Cari id token untuk "yes" dan "no"
+    yes_token_id = tokenizer.encode("yes", add_special_tokens=False)[0]
+    no_token_id = tokenizer.encode("no", add_special_tokens=False)[0]
+    
+    # Hitung probabilitas ternormalisasi (Metode Peak Relevance)
+    target_logits = logits[0, [yes_token_id, no_token_id]]
+    probs = torch.softmax(target_logits, dim=-1)
+    
+    return probs[0].item() # Kembalikan skor probabilitas untuk "yes"
